@@ -13,6 +13,26 @@ function App() {
     setCurrentMessage("");
   };
 
+  const handleFileUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:6789/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log("File uploaded successfully");
+      } else {
+        console.error("File upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="mb-5 text-2xl font-bold">TeamMate</h1>
@@ -21,6 +41,7 @@ function App() {
         currentMessage={currentMessage}
         setCurrentMessage={setCurrentMessage}
         handleSendMessage={handleSendMessage}
+        handleFileUpload={handleFileUpload}
       />
     </div>
   );
@@ -56,12 +77,14 @@ interface MessageInputProps {
   currentMessage: string;
   setCurrentMessage: (message: string) => void;
   handleSendMessage: () => void;
+  handleFileUpload: (file: File) => void;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
   currentMessage,
   setCurrentMessage,
   handleSendMessage,
+  handleFileUpload,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentMessage(e.target.value);
@@ -73,8 +96,19 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="flex w-4/5 max-w-3xl">
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="ml-2 p-2 border border-gray-300 rounded-r-lg max-w-40 mr-2 "
+      />
       <input
         type="text"
         value={currentMessage}
